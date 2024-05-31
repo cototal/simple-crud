@@ -1,19 +1,19 @@
 -- SelectOneTask
-SELECT * FROM Task
+SELECT * FROM task
 WHERE id = ?
 
 -- SelectAllTasks
-SELECT * FROM Task
+SELECT * FROM task
 
 -- CreateOneTask
-INSERT INTO Task (name)
+INSERT INTO task (name)
 VALUES (?)
 
 -- UpdateOneTask
-UPDATE Task
+UPDATE task
 SET name = ?
 WHERE id = ?
 
 -- DeleteOneTask
-DELETE FROM Task
+DELETE FROM task
 WHERE id = ?

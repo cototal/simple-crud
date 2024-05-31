@@ -1,21 +1,21 @@
 package queries
 
 func SelectOneTask() string {
-	return "SELECT * FROM Task WHERE id = ?"
+	return "SELECT * FROM task WHERE id = ?"
 }
 
 func SelectAllTasks() string {
-	return "SELECT * FROM Task"
+	return "SELECT * FROM task"
 }
 
 func CreateOneTask() string {
-	return "INSERT INTO Task (name) VALUES (?)"
+	return "INSERT INTO task (name) VALUES (?)"
 }
 
 func UpdateOneTask() string {
-	return "UPDATE Task SET name = ? WHERE id = ?"
+	return "UPDATE task SET name = ? WHERE id = ?"
 }
 
 func DeleteOneTask() string {
-	return "DELETE FROM Task WHERE id = ?"
+	return "DELETE FROM task WHERE id = ?"
 }
