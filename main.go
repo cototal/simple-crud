@@ -2,6 +2,7 @@ package main
 
 import (
 	"cototal/simple-crud/queries"
+	"cototal/simple-crud/repos"
 	"database/sql"
 	"encoding/json"
 	"fmt"
@@ -13,11 +14,6 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
 )
-
-type Task struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
-}
 
 func main() {
 	err := godotenv.Load()
@@ -39,21 +35,10 @@ func main() {
 
 	router := http.NewServeMux()
 	router.HandleFunc("GET /", func(wtr http.ResponseWriter, req *http.Request) {
-		rows, err := db.Query(queries.SelectAllTasks())
+		tasks, err := repos.GetAllTasks(db)
 		if err != nil {
 			http.Error(wtr, err.Error(), http.StatusInternalServerError)
 			return
-		}
-		defer rows.Close()
-
-		tasks := make([]Task, 0, 20)
-		for rows.Next() {
-			var task Task
-			if err := rows.Scan(&task.ID, &task.Name); err != nil {
-				http.Error(wtr, err.Error(), http.StatusInternalServerError)
-				return
-			}
-			tasks = append(tasks, task)
 		}
 
 		wtr.Header().Set("Content-Type", "application/json")
@@ -61,25 +46,17 @@ func main() {
 	})
 
 	router.HandleFunc("POST /", func(wtr http.ResponseWriter, req *http.Request) {
-		var task Task
+		var task repos.Task
 		if err := json.NewDecoder(req.Body).Decode(&task); err != nil {
 			http.Error(wtr, err.Error(), http.StatusBadRequest)
 			return
 		}
 
-		result, err := db.Exec(queries.CreateOneTask(), task.Name)
+		err = repos.CreateTask(db, &task)
 		if err != nil {
 			http.Error(wtr, err.Error(), http.StatusInternalServerError)
 			return
 		}
-
-		id, err := result.LastInsertId()
-		if err != nil {
-			http.Error(wtr, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		task.ID = int(id)
 		wtr.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(wtr).Encode(task)
 	})
@@ -91,7 +68,7 @@ func main() {
 			return
 		}
 
-		var task Task
+		var task repos.Task
 		err = db.QueryRow(queries.SelectOneTask(), id).Scan(
 			&task.ID, &task.Name)
 
@@ -115,7 +92,7 @@ func main() {
 			return
 		}
 
-		var task Task
+		var task repos.Task
 		if err = json.NewDecoder(req.Body).Decode(&task); err != nil {
 			http.Error(wtr, err.Error(), http.StatusBadRequest)
 			return
