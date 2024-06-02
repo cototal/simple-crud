@@ -29,6 +29,18 @@ func GetAllTasks(db *sql.DB) ([]Task, error) {
 	return tasks, nil
 }
 
+func GetTask(db *sql.DB, id int) (Task, error) {
+	var task Task
+	err := db.QueryRow(queries.SelectOneTask(), id).Scan(
+		&task.ID, &task.Name)
+
+	if err != nil {
+		return Task{}, err
+	}
+
+	return task, nil
+}
+
 func CreateTask(db *sql.DB, task *Task) error {
 	result, err := db.Exec(queries.CreateOneTask(), task.Name)
 	if err != nil {
@@ -39,5 +51,23 @@ func CreateTask(db *sql.DB, task *Task) error {
 		return err
 	}
 	task.ID = int(id)
+	return nil
+}
+
+func UpdateTask(db *sql.DB, id int, task *Task) error {
+	_, err := db.Exec(queries.UpdateOneTask(), task.Name, id)
+	if err != nil {
+		return err
+	}
+	task.ID = id
+	return nil
+}
+
+func DeleteTask(db *sql.DB, id int) error {
+	_, err := db.Exec(queries.DeleteOneTask(), id)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

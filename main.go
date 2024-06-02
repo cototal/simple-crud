@@ -1,7 +1,6 @@
 package main
 
 import (
-	"cototal/simple-crud/queries"
 	"cototal/simple-crud/repos"
 	"database/sql"
 	"encoding/json"
@@ -68,9 +67,7 @@ func main() {
 			return
 		}
 
-		var task repos.Task
-		err = db.QueryRow(queries.SelectOneTask(), id).Scan(
-			&task.ID, &task.Name)
+		task, err := repos.GetTask(db, id)
 
 		if err != nil {
 			if err == sql.ErrNoRows {
@@ -98,14 +95,12 @@ func main() {
 			return
 		}
 
-		_, err = db.Exec(queries.UpdateOneTask(), task.Name, id)
-
+		err = repos.UpdateTask(db, id, &task)
 		if err != nil {
 			http.Error(wtr, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		task.ID = id
 		wtr.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(wtr).Encode(task)
 	})
@@ -117,7 +112,7 @@ func main() {
 			return
 		}
 
-		_, err = db.Exec(queries.DeleteOneTask(), id)
+		err = repos.DeleteTask(db, id)
 		if err != nil {
 			http.Error(wtr, err.Error(), http.StatusInternalServerError)
 			return
